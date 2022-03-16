@@ -1,0 +1,49 @@
+version: '3'
+
+services: 
+
+  node_app:
+    build: 
+      context: ./node
+      dockerfile: Dockerfile.prod
+    image: kramerscs/docker-challenge-2-node:prod
+    container_name: node_app
+    networks: 
+      - challenge_2
+    volumes: 
+      - ./node:/usr/src/app
+    tty: true
+    ports: 
+      - "3000:3000"
+    depends_on: 
+       - node_data_db
+
+  node_data_db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: node_data_db
+    restart: always
+    tty: true
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    environment: 
+      - MYSQL_DATABASE=challenge2
+      - MYSQL_ROOT_PASSWORD=root
+    networks: 
+      - challenge_2
+
+  nginx_node:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    image: kramerscs/docker-challenge-2-nginx:prod
+    container_name: nginx_node
+    networks:
+    - challenge_2
+    ports:
+    - "8080:80"
+
+    
+networks: 
+  challenge_2:
+    driver: bridge
